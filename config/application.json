@@ -1,0 +1,73 @@
+{
+  "title": "",
+  "description": "",
+  "portalUrl": "https://www.arcgis.com",
+  "oauthappid": "6NsKkXvcADmfBicB",
+  "apiKey": null,
+  "group": "",
+  "webmap": "a8747e08082945e4a53157c60044b52a",
+  "webscene": "",
+  "container": "view-container",
+  "shareable": [],
+  "suitability": {
+    "layerTitle": "Stations",
+    "featureList": {
+      "outFields": [
+        "ObjectId",
+        "Unit",
+        "FinalScore"
+      ],
+      "orderByFields": [
+        "FinalScore DESC"
+      ],
+      "labelField": "Unit",
+      "descriptionField": "FinalScore"
+    },
+    "tableFieldsConfig": [
+      {
+        "name": "Unit",
+        "label": "Unit"
+      },
+      {
+        "name": "FinalScore",
+        "label": "Final Score",
+        "direction": "desc"
+      },
+      {
+        "name": "OverlapCount",
+        "label": "Overlap Count"
+      },
+      {
+        "name": "PercentNonOverlap",
+        "label": "Percent Non-Overlap"
+      },
+      {
+        "name": "SumSorties",
+        "label": "Sum Sorties"
+      }
+    ],
+    "analysis": {
+      "defaultMin": 1,
+      "defaultMax": 10,
+      "defaultWeight": 5,
+      "weights": [
+        {
+          "label": "Overlap Count",
+          "valueFieldName": "OverlapCount_EQUAL_INTERVAL",
+          "weightFieldName": "OverlapCount_WEIGHT"
+        },
+        {
+          "label": "Percent Non-Overlap",
+          "valueFieldName": "PercentNonOverlap_EQUAL_INTERVA",
+          "weightFieldName": "PercentNonOverlap_WEIGHT"
+        },
+        {
+          "label": "Sum Sorties",
+          "valueFieldName": "SumSorties_EQUAL_INTERVAL",
+          "weightFieldName": "SumSorties_WEIGHT"
+        }
+      ],
+      "scoreFieldName": "FinalScore"
+    }
+  }
+}

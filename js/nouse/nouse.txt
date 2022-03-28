@@ -1,0 +1,63 @@
+const calcFinalScore = () => {
+      return new Promise((resolve, reject) => {
+
+        const allQuery = suitabilityLayer.createQuery();
+        allQuery.set({outFields: ['*'], where: '1=1'});
+
+        suitabilityLayer.queryFeatures().then(allFS => {
+
+          const updateFeatures = allFS.features.map(suitabilitySource.calcFeatureScore);
+
+          suitabilityLayer.applyEdits({updateFeatures}).then((editsResults) => {
+            const errorEditResults = editsResults.updateFeatureResults.filter(editResult => editResult.error != null);
+            if (errorEditResults.length) {
+              console.warn(errorEditResults);
+              reject(new Error(`There were ${ errorEditResults.length } edit errors...`));
+            } else {
+              suitabilityLayer.refresh();
+              resolve();
+            }
+          });
+        });
+
+      });
+    };
+
+((($feature['OverlapCount_EQUAL_INTERVAL'] * $feature['OverlapCount_WEIGHT']) + ($feature['PercentNonOverlap_EQUAL_INTERVA'] * $feature['PercentNonOverlap_WEIGHT']) + ($feature['SumSorties_EQUAL_INTERVAL'] * $feature['SumSorties_WEIGHT'])) / ($feature['OverlapCount_WEIGHT'] + $feature['PercentNonOverlap_WEIGHT'] + $feature['SumSorties_WEIGHT']))
+
+/*const {fieldCalcs, weights} = this.suitability.inputs.reduce((infos, inputInfo) => {
+     infos.fieldCalcs.push(`($feature.${ inputInfo.valueField } * $feature.${ inputInfo.weightField })`);
+     infos.weights.push(`$feature.${ inputInfo.weightField }`);
+     return infos;
+     }, {fieldCalcs: [], weights: []});*/
+
+    /*const getArcadeScoreExpression = () =>{
+      const {fieldCalcs, weights} = this.suitability.inputs.reduce((infos, inputInfo) => {
+        infos.fieldCalcs.push(`($feature.${ inputInfo.valueField } * $feature.${ inputInfo.weightField })`);
+        infos.weights.push(`$feature.${inputInfo.weightField}`);
+        return infos;
+      }, {fieldCalcs: [], weights: []});
+      return `((${ fieldCalcs.join(' + ') }) / (${ weights.join(' + ') }))`;
+    }*/
+
+ //const inputsRange = this.suitability.inputsRange;
+        /*const suitabilityNodes = this.suitability.inputs.map(inputInfo => {
+         const templateNode = suitabilityInputTemplate.content.cloneNode(true);
+
+         const suitabilityNode = templateNode.querySelector('calcite-block');
+         suitabilityNode.setAttribute('heading', inputInfo.label);
+         suitabilityNode.setAttribute('summary', `${ inputInfo.valueField } * ${ inputInfo.weightField }`);
+
+         const inputSlider = suitabilityNode.querySelector('calcite-slider');
+         inputSlider.setAttribute('min', inputsRange.min);
+         inputSlider.setAttribute('max', inputsRange.max);
+         inputSlider.setAttribute('value', inputInfo.weight);
+         inputSlider.setAttribute('ticks', '1');
+
+         inputSlider.addEventListener('calciteSliderInput', () => {
+         inputInfo.weight = inputSlider.value;
+         updateSuitabilityScore();
+         });
+
+         return suitabilityNode;
+         });*/
