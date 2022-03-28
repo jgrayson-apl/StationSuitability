@@ -23,7 +23,7 @@ Update the [application.json](https://github.com/jgrayson-apl/StationSuitability
 |             **oauthappid** | The client app id for the web application item.<br><br>You can create the Client ID through the https://developers.arcgis.com/ website, or via the web application item page, 'Settings' tab, 'App Registration' section.                                                                                   |
 |                 **webmap** | This is the ArcGIS item ID of your Web Map.                                                                                                                                                                                                                                                        |
 
-#### SUITABILITY ANALYSIS CONFIGURATION
+### SUITABILITY ANALYSIS CONFIGURATION
 The '**_suitability_**' section of the config file is used to configure the suitability analysis settings specific to your layer.
 
 _**layerTitle**_: the title of the Feature Layer as configured in the Web Map.
