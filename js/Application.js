@@ -366,39 +366,6 @@ class Application extends AppBase {
    */
   initializeSuitabilityAnalysis({view, suitabilityLayer}) {
 
-    //
-    // CREATE SUITABILITY UI //
-    //
-    const scoreExpression = document.getElementById('score-expression');
-    const suitabilityExpression = document.getElementById('suitability-expression');
-    const suitabilityContainer = document.getElementById('suitability-container');
-
-    // SUITABILITY SOURCE //
-    const suitabilitySource = new SuitabilitySource({
-      layer: suitabilityLayer,
-      analysis: this.suitability.analysis
-    });
-    suitabilityContainer.append(suitabilitySource);
-
-    suitabilitySource.addEventListener('ready', () => {
-      scoreExpression.innerHTML = suitabilitySource.getStaticScoreExpression();
-      updateSuitabilityScore(suitabilitySource.getDynamicScoreExpression());
-    });
-    suitabilitySource.addEventListener('weight-change', ({detail: {scoreExpression}}) => {
-      updateSuitabilityScore(scoreExpression);
-    });
-
-    /**
-     *
-     */
-    const updateSuitabilityScore = (scoreExpression) => {
-
-      suitabilityExpression.innerHTML = scoreExpression;
-
-      updateScoreRenderer(scoreExpression);
-      updateScoreLabel(scoreExpression);
-    };
-
     // SCORE RENDERER //
     const sizeVV = suitabilityLayer.renderer.visualVariables.find(vv => vv.type === 'size');
     const updateScoreRenderer = scoreExpression => {
@@ -420,6 +387,38 @@ class Application extends AppBase {
         suitabilityLayer.labelingInfo = [unitLabel, scoreLabel];
       }
     };
+
+    //
+    // CREATE SUITABILITY UI //
+    //
+    const scoreExpression = document.getElementById('score-expression');
+    const suitabilityExpression = document.getElementById('suitability-expression');
+    const suitabilityContainer = document.getElementById('suitability-container');
+
+    /**
+     *
+     */
+    const updateSuitabilityScore = (scoreExpression) => {
+      suitabilityExpression.innerHTML = scoreExpression;
+      updateScoreRenderer(scoreExpression);
+      updateScoreLabel(scoreExpression);
+    };
+
+
+    // SUITABILITY SOURCE //
+    const suitabilitySource = new SuitabilitySource({
+      layer: suitabilityLayer,
+      analysis: this.suitability.analysis
+    });
+    suitabilityContainer.append(suitabilitySource);
+
+    suitabilitySource.addEventListener('ready', () => {
+      scoreExpression.innerHTML = suitabilitySource.getStaticScoreExpression();
+      updateSuitabilityScore(suitabilitySource.getDynamicScoreExpression());
+    });
+    suitabilitySource.addEventListener('weight-change', ({detail: {scoreExpression}}) => {
+      updateSuitabilityScore(scoreExpression);
+    });
 
     //
     // SAVE WEIGHTS AND SCORES //
