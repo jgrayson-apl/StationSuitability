@@ -410,11 +410,15 @@ class Application extends AppBase {
     };
 
     // SCORE LABEL //
-    const unitLabel = suitabilityLayer.labelingInfo[0].clone();
-    const scoreLabel = suitabilityLayer.labelingInfo[1].clone();
+    const labelingInfo = suitabilityLayer.labelingInfo;
+    const hasLabelingInfo = (labelingInfo && labelingInfo.length);
+    const unitLabel = labelingInfo[0]?.clone();
+    const scoreLabel = labelingInfo[1]?.clone();
     const updateScoreLabel = (scoreExpression) => {
-      scoreLabel.labelExpressionInfo.expression = `Text(${ scoreExpression },"0.000");`;
-      suitabilityLayer.labelingInfo = [unitLabel, scoreLabel];
+      if (hasLabelingInfo) {
+        scoreLabel.labelExpressionInfo.expression = `Text(${ scoreExpression },"0.000");`;
+        suitabilityLayer.labelingInfo = [unitLabel, scoreLabel];
+      }
     };
 
     //
