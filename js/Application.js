@@ -76,25 +76,15 @@ class Application extends AppBase {
   configView(view) {
     return new Promise((resolve, reject) => {
       if (view) {
-        require([
-          'esri/widgets/Home',
-          'esri/widgets/Search',
-          'esri/widgets/LayerList',
-          'esri/widgets/Legend',
-          "esri/widgets/Compass"
-        ], (Home, Search, LayerList, Legend, Compass) => {
+        require(['esri/widgets/Home', 'esri/widgets/Search', 'esri/widgets/LayerList', 'esri/widgets/Legend', "esri/widgets/Compass"], (Home, Search, LayerList, Legend, Compass) => {
 
           //
           // CONFIGURE VIEW SPECIFIC STUFF HERE //
           //
           view.set({
-            constraints: {snapToZoom: false},
-            popup: {
-              dockEnabled: true,
-              dockOptions: {
-                buttonEnabled: false,
-                breakpoint: false,
-                position: "top-right"
+            constraints: {snapToZoom: false}, popup: {
+              dockEnabled: true, dockOptions: {
+                buttonEnabled: false, breakpoint: false, position: "top-right"
               }
             }
           });
@@ -122,12 +112,9 @@ class Application extends AppBase {
 
           // LAYER LIST //
           const layerList = new LayerList({
-            container: 'layer-list-container',
-            view: view,
-            listItemCreatedFunction: (event) => {
+            container: 'layer-list-container', view: view, listItemCreatedFunction: (event) => {
               event.item.open = (event.item.layer.type === 'group');
-            },
-            visibleElements: {statusIndicators: true}
+            }, visibleElements: {statusIndicators: true}
           });
 
           // VIEW UPDATING //
@@ -202,15 +189,10 @@ class Application extends AppBase {
       const scoreFormatter = new Intl.NumberFormat('default', {minimumFractionDigits: 3, maximumFractionDigits: 3});
 
       const layerInfo = {
-        filter: '1=1',
-        queryParams: {
-          returnGeometry: true,
-          outFields: this.suitability.featureList.outFields,
-          orderByFields: this.suitability.featureList.orderByFields
-        },
-        itemInfos: {
-          label: f => `${ f.attributes[this.suitability.featureList.labelField] }`,
-          description: f => `Score: ${ scoreFormatter.format(f.attributes[this.suitability.featureList.descriptionField]) }`
+        filter: '1=1', queryParams: {
+          returnGeometry: true, outFields: this.suitability.featureList.outFields, orderByFields: this.suitability.featureList.orderByFields
+        }, itemInfos: {
+          label: f => `${ f.attributes[this.suitability.featureList.labelField] }`, description: f => `Score: ${ scoreFormatter.format(f.attributes[this.suitability.featureList.descriptionField]) }`
         }
       };
 
@@ -346,10 +328,7 @@ class Application extends AppBase {
     require(['esri/widgets/FeatureTable'], (FeatureTable) => {
 
       const featureTable = new FeatureTable({
-        container: "table-container",
-        view: view,
-        layer: suitabilityLayer,
-        fieldConfigs: this.suitability.tableFieldsConfig
+        container: "table-container", view: view, layer: suitabilityLayer, fieldConfigs: this.suitability.tableFieldsConfig
       });
 
       this._evented.on('final-score-change', () => {
@@ -366,51 +345,122 @@ class Application extends AppBase {
    */
   initializeSuitabilityAnalysis({view, suitabilityLayer}) {
 
-    // SCORE RENDERER //
-    const sizeVV = suitabilityLayer.renderer.visualVariables.find(vv => vv.type === 'size');
-    const updateScoreRenderer = scoreExpression => {
-      const renderer = suitabilityLayer.renderer.clone();
-      renderer.expression = scoreExpression;
-      sizeVV.valueExpression = scoreExpression;
-      renderer.visualVariables = [sizeVV];
-      suitabilityLayer.renderer = renderer;
-    };
-
-    // SCORE LABEL //
-    const labelingInfo = suitabilityLayer.labelingInfo;
-    const hasLabelingInfo = (labelingInfo && labelingInfo.length);
-    const unitLabel = labelingInfo[0]?.clone();
-    const scoreLabel = labelingInfo[1]?.clone();
-    const updateScoreLabel = (scoreExpression) => {
-      if (hasLabelingInfo) {
-        scoreLabel.labelExpressionInfo.expression = `Text(${ scoreExpression },"0.000");`;
-        suitabilityLayer.labelingInfo = [unitLabel, scoreLabel];
-      }
-    };
-
-    //
     // CREATE SUITABILITY UI //
-    //
     const scoreExpression = document.getElementById('score-expression');
     const suitabilityExpression = document.getElementById('suitability-expression');
     const suitabilityContainer = document.getElementById('suitability-container');
+
+    //
+    // SUITABILITY SOURCE //
+    //
+    const suitabilitySource = new SuitabilitySource({
+      layer: suitabilityLayer,
+      analysis: this.suitability.analysis
+    });
+    suitabilityContainer.append(suitabilitySource);
+
+    /**
+     *
+     * @param renderer
+     * @returns {*}
+     */
+    const getRendererSymbol = renderer => {
+      switch (renderer.type) {
+        case 'simple':
+          return renderer.symbol.clone();
+        case 'class-breaks':
+          return renderer.classBreakInfos[0].symbol.clone();
+      }
+    };
+
+    // DEFAULT SYMBOL //
+    const defaultSymbol = getRendererSymbol(suitabilityLayer.renderer);
+
+    /**
+     *
+     * @param scoreExpression
+     * @returns {{valueExpression, minDataValue: number, maxDataValue: number, valueExpressionTitle: string, minSize: number, maxSize: number, type: string}}
+     */
+    const getSuitabilitySizeVV = (scoreExpression) => {
+      return {
+        type: 'size',
+        minDataValue: suitabilitySource.defaultMin,
+        maxDataValue: suitabilitySource.defaultMax,
+        minSize: 5,
+        maxSize: 25,
+        valueExpressionTitle: "Suitability Score",
+        valueExpression: scoreExpression
+      };
+    };
+
+    /**
+     *
+     * @param scoreExpression
+     * @returns {{symbol: *, visualVariables: {valueExpression, minDataValue: number, maxDataValue: number, valueExpressionTitle: string, minSize: number, maxSize: number, type: string}[], type: string}}
+     */
+    const getSuitabilityRenderer = (scoreExpression) => {
+      return {
+        type: 'simple',
+        symbol: defaultSymbol,
+        visualVariables: [getSuitabilitySizeVV(scoreExpression)]
+      };
+    };
+
+    // DEFAULT LABEL FIELD //
+    const labelFieldName = this.suitability.featureList.labelField || 'Name';
+
+    /**
+     *
+     * @returns {{symbol: {color: string, haloSize: number, haloColor: string, type: string, font: {size: number, weight: string, family: string}}, labelExpressionInfo: {expression: string}, labelPlacement: string}}
+     */
+    const getNameLabelClass = () => {
+      return {
+        labelPlacement: 'above-right',
+        labelExpressionInfo: {
+          expression: `$feature['${ labelFieldName }']`
+        },
+        symbol: {
+          type: 'text',
+          color: '#2b2b2b',
+          font: {family: "Avenir Next LT Pro Medium", size: 9, weight: "bold"},
+          haloColor: '#ffffff',
+          haloSize: 0.75
+        }
+      };
+    };
+
+    // DEFAULT NAME LABEL CLASS //
+    const nameLabelClass = getNameLabelClass();
+
+    /**
+     *
+     * @param scoreExpression
+     * @returns {{symbol: {color: string, haloSize: number, haloColor: string, type: string, font: {size: number, weight: string, family: string}}, labelExpressionInfo: {expression: string}, labelPlacement: string}}
+     */
+    const getScoreLabelClass = (scoreExpression) => {
+      return {
+        labelPlacement: 'center-right',
+        labelExpressionInfo: {
+          expression: `Text(${ scoreExpression },"0.000")`
+        },
+        symbol: {
+          type: 'text',
+          color: '#FF8202',
+          font: {family: "Avenir Next LT Pro Medium", size: 8, weight: "bold"},
+          haloColor: '#ffffff',
+          haloSize: 1.25
+        }
+      };
+    };
 
     /**
      *
      */
     const updateSuitabilityScore = (scoreExpression) => {
       suitabilityExpression.innerHTML = scoreExpression;
-      updateScoreRenderer(scoreExpression);
-      updateScoreLabel(scoreExpression);
+      suitabilityLayer.renderer = getSuitabilityRenderer(scoreExpression);
+      suitabilityLayer.labelingInfo = [nameLabelClass, getScoreLabelClass(scoreExpression)];
     };
-
-
-    // SUITABILITY SOURCE //
-    const suitabilitySource = new SuitabilitySource({
-      layer: suitabilityLayer,
-      analysis: this.suitability.analysis
-    });
-    suitabilityContainer.append(suitabilitySource);
 
     suitabilitySource.addEventListener('ready', () => {
       scoreExpression.innerHTML = suitabilitySource.getStaticScoreExpression();

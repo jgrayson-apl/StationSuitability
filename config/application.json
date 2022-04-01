@@ -5,28 +5,28 @@
   "oauthappid": "6NsKkXvcADmfBicB",
   "apiKey": null,
   "group": "",
-  "webmap": "a8747e08082945e4a53157c60044b52a",
+  "webmap": "2672661e983145119d4c4b5ee638bd8a",
   "webscene": "",
   "container": "view-container",
   "shareable": [],
   "suitability": {
-    "layerTitle": "Stations",
+    "layerTitle": "Pirate_Coves",
     "featureList": {
       "outFields": [
         "ObjectId",
-        "Unit",
+        "Name",
         "FinalScore"
       ],
       "orderByFields": [
         "FinalScore DESC"
       ],
-      "labelField": "Unit",
+      "labelField": "Name",
       "descriptionField": "FinalScore"
     },
     "tableFieldsConfig": [
       {
-        "name": "Unit",
-        "label": "Unit"
+        "name": "Name",
+        "label": "Name"
       },
       {
         "name": "FinalScore",

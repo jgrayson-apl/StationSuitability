@@ -161,6 +161,8 @@ class SuitabilityWeight extends HTMLElement {
   validateValueRanges() {
     return new Promise((resolve, reject) => {
 
+      const hasFields = (this.valueField && this.weightField);
+
       const valueFieldName = this.valueField.name;
 
       const valueRangeQuery = this.source.layer.createQuery();
@@ -187,7 +189,7 @@ class SuitabilityWeight extends HTMLElement {
         const validRangeMin = (valueRangesStats[`${ valueFieldName }_min`] >= this.min);
         const validRangeMax = (valueRangesStats[`${ valueFieldName }_max`] <= this.max);
 
-        resolve({valid: validRangeMin && validRangeMax});
+        resolve({valid: hasFields && validRangeMin && validRangeMax});
       }).catch(reject);
 
     });
@@ -198,7 +200,7 @@ class SuitabilityWeight extends HTMLElement {
    * @returns {string}
    */
   getDynamicCalculation() {
-    return `($feature.${ this.valueField.name } * ${ this.weight })`;
+    return !this.disabled ? `($feature.${ this.valueField.name } * ${ this.weight })` : '1.0';
   }
 
   /**
@@ -206,7 +208,7 @@ class SuitabilityWeight extends HTMLElement {
    * @returns {string}
    */
   getStaticCalculation() {
-    return `($feature.${ this.valueField.name } * $feature.${ this.weightField.name })`;
+    return !this.disabled ? `($feature.${ this.valueField.name } * $feature.${ this.weightField.name })` : '1.0';
   }
 
 }

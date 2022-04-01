@@ -222,11 +222,16 @@ class SuitabilitySource extends HTMLElement {
    */
   calcFeatureScore(feature) {
 
-    const atts = feature.attributes;
+    // DON'T SEND GEOMETRY TO APPLY EDITS //
+    const editFeature = feature.clone();
+    editFeature.geometry = null;
+
+    // ATTRIBUTES //
+    const atts = editFeature.attributes;
 
     const {weightedValues, totalWeights} = this.suitabilityWeights.reduce((infos, suitabilityWeight) => {
       if (!suitabilityWeight.disabled) {
-        feature.setAttribute(suitabilityWeight.weightField.name, suitabilityWeight.weight);
+        editFeature.setAttribute(suitabilityWeight.weightField.name, suitabilityWeight.weight);
 
         infos.weightedValues += (atts[suitabilityWeight.valueField.name] * suitabilityWeight.weight);
         infos.totalWeights += suitabilityWeight.weight;
@@ -236,9 +241,9 @@ class SuitabilitySource extends HTMLElement {
     }, {weightedValues: 0, totalWeights: 0});
 
     const finalScore = totalWeights ? (weightedValues / totalWeights) : this.defaultMin;
-    feature.setAttribute(this.scoreFieldName, finalScore.toPrecision(4));
+    editFeature.setAttribute(this.scoreFieldName, finalScore.toPrecision(4));
 
-    return feature;
+    return editFeature;
   }
 
   /**
