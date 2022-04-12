@@ -5,12 +5,12 @@
   "oauthappid": "6NsKkXvcADmfBicB",
   "apiKey": null,
   "group": "",
-  "webmap": "2672661e983145119d4c4b5ee638bd8a",
+  "webmap": "188b437023be4a5dbf925b240dbe751f",
   "webscene": "",
   "container": "view-container",
   "shareable": [],
   "suitability": {
-    "layerTitle": "Pirate_Coves",
+    "layerTitle": "Pirate Coves",
     "featureList": {
       "outFields": [
         "ObjectId",
